@@ -45,6 +45,11 @@ export const Connected: FC = () => {
 
 
     const clickPay = async (companyPrivateKey: any, cost: any) => {
+        if (!cost) {
+
+            resultToast("error", "Amount is required");
+            return
+        }
 
         const payKeypair = Keypair.fromSecretKey(base58.decode(companyPrivateKey));
 
@@ -90,6 +95,9 @@ export const Connected: FC = () => {
         }
     };
 
+    const showQR = () => {
+        console.log('Show QR')
+    }
 
 
 
@@ -104,6 +112,7 @@ export const Connected: FC = () => {
                 {
                     tables.map((item, index) => {
                         const [amount, setAmount] = useState('');
+                        const [qrCode, setQrCode] = useState(false)
 
                         return (
                             <Box key={index}
@@ -120,7 +129,7 @@ export const Connected: FC = () => {
 
                             >
 
-                                <Stack pt={10} align={'center'} justify={'center'}>
+                                <Stack pt={10} align={'center'} justify={'center'} direction={'column'} justifyContent={'space-between'}>
                                     <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
                                         {item.name} - {item.id}
                                     </Heading>
@@ -133,6 +142,19 @@ export const Connected: FC = () => {
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)} />
                                     </Stack>
+                                    {qrCode
+                                        ? 'QR CODE Image'
+                                        : <Button
+                                            color={'teal'}
+                                            variant={'solid'}
+                                            onClick={() => { 
+                                                showQR()
+                                                setQrCode(true) }}
+                                        >
+                                            Create QR
+                                        </Button>
+                                    }
+
                                     <Button
                                         color={'teal'}
                                         variant={'ghost'}
@@ -141,8 +163,15 @@ export const Connected: FC = () => {
                                             setAmount('');
                                         }}
                                     >
-                                        Send Amount To Table
+                                        Send Amount To QR
                                     </Button>
+                                    
+                                    <Heading fontSize={'4xl'} fontFamily={'body'} fontWeight={500}>
+                                        {qrCode && 'QR'}
+                                    </Heading>                                    
+
+
+                                    
                                 </Stack>
                             </Box>
                         )
