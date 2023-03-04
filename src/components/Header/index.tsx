@@ -7,34 +7,20 @@ import NextLink from 'next/link'
 import {
   Box,
   Flex,
-  Text,
-  IconButton,
-  Image,
   Button,
   Stack,
-  Collapse,
-  Icon,
-  Link,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
   useColorModeValue,
   useBreakpointValue,
   useDisclosure,
   useColorMode
 } from '@chakra-ui/react';
 import {
-  HamburgerIcon,
-  CloseIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
   MoonIcon,
   SunIcon
 } from '@chakra-ui/icons';
 
 export const Header: FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { isOpen, onToggle } = useDisclosure();
 
   return (
     <Box >
@@ -47,6 +33,8 @@ export const Header: FC = () => {
         borderBottom={1}
         borderStyle={'solid'}
         borderColor={'#bbbbbb'}
+        justify={'flex-end'}
+
         >
         
 
@@ -71,8 +59,7 @@ export const Header: FC = () => {
 
         </Stack>
       </Flex>
-
-      
+    
     </Box>
   );
 }
