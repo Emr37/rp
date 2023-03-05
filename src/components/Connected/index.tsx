@@ -25,20 +25,17 @@ import {
 import { useQr } from '@/context/QrContextProvider';
 
 
+
 export const Connected: FC = () => {
-    const ref = useRef(null);
     //const { qR, setQr, amount, tableId }: any = useQr();
-
-
 
     const [tx, setTx] = useState("");
     const [transactionState, setTransactionState] = useState(false);
 
-
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
 
-    const companyPrivateKey = nextConfig.env.COM1_PRIVATE_KEY
+    const companyPrivateKey = nextConfig.env.COM_PRIVATE_KEY
 
 
     const toast = useToast();
@@ -105,24 +102,24 @@ export const Connected: FC = () => {
         }
     };
 
-  
 
-    
+    const listTables = tables.map((item, index) => {
 
-    
-    const listTables =  tables.map((item, index) => {
         const [amount, setAmount] = useState('');
         const [show, setShow] = useState(false);
+        const qrRef = useRef(null)
 
         const showQR = (amount: any, item: any) => {
 
-            if (amount <= 0 ) {
+
+            if (amount <= 0) {
                 resultToast('error', 'amount is required')
-            }else {
+            } else {
                 console.log('Show QR')
-    
+
+
                 const payKeypair = Keypair.fromSecretKey(base58.decode(companyPrivateKey));
-        
+
                 const url = encodeURL({
                     recipient: payKeypair!.publicKey,
                     amount: new BigNumber(amount),
@@ -130,15 +127,16 @@ export const Connected: FC = () => {
                     label: `RPS: Table - ${item.id}`,
                     message: 'Thanks for your order',
                 });
-                console.log(url);
-                const qrCode = createQR(url, 128, 'transparent', '#8f6ddf');
+                console.log(typeof url);
+                
+                const qrCode = createQR(url, 128, 'transparent');
                 console.log(qrCode);
-                console.log(ref.current);
-               if (ref.current) {
-                    qrCode.append(ref.current)
+                console.log(qrRef.current);
+                if (qrRef.current) {
+                    qrCode.append(qrRef.current)
                 } else return;
             }
-           
+
         }
 
 
@@ -158,9 +156,6 @@ export const Connected: FC = () => {
 
 
                 <Stack pt={10} align={'center'} justify={'center'} direction={'column'} >
-
-
-
                     <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
                         {item.name} - {item.id}
                     </Heading>
@@ -169,17 +164,14 @@ export const Connected: FC = () => {
                             Amount
                         </Text>
                         <Input
-
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)} />
-                                                    
-
                     </Stack>
                     {!show && <Button
                         color={'teal'}
                         variant={'solid'}
                         onClick={() => {
-                            
+
                             showQR(amount, item)
                             setAmount('')
                         }}
@@ -198,9 +190,8 @@ export const Connected: FC = () => {
                     >
                         Send Amount To QR
                     </Button>
-                    <Box bg={'gray.400'} h={'128px'} w={'128px'}ref={ref}/>
-                    
 
+                    <Box bg={'gray.400'} h={'128px'} w={'128px'} ref={qrRef} />
 
                 </Stack>
             </Box>
