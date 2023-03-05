@@ -33,7 +33,6 @@ export default function Checkout() {
   const [storeAdress, setStoreAdress] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentCurrency, setPaymentCurrency] = useState('SOL');
-  const [memo, setMemo] = useState('');
   const [isGenerated, setIsGenerated] = useState(true);
   let ref = useRef(null);
 
@@ -44,7 +43,7 @@ export default function Checkout() {
 
     useEffect(() => {
         if (isGenerated) {
-          const payment_recipient = new PublicKey(nextConfig.env.COM_PRIVATE_KEY);
+          const payment_recipient = new PublicKey(nextConfig.env.COM1_PRIVATE_KEY);
           const payment_amount = new BigNumber(paymentAmount);
           console.log('f' + payment_amount);
           const payment_reference = new Keypair().publicKey;
@@ -59,7 +58,6 @@ export default function Checkout() {
             payment_reference,
             payment_label,
             payment_message,
-            payment_memo
           );
     
           const url = encodeURL({
@@ -68,7 +66,6 @@ export default function Checkout() {
             reference: payment_reference,
             label: payment_label,
             message: payment_message,
-            memo: payment_memo,
           });
           console.log(url);
           const qrCode = createQR(url);

@@ -1,10 +1,14 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect, useState, useRef, useContext } from 'react'
 import styles from './styles.module.css'
 import base58 from "bs58";
 import { Keypair, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js'
+import { encodeURL, createQR } from '@solana/pay'
 import nextConfig from 'next.config';
 import { tables } from '../../pages/api/tables'
+import BigNumber from 'bignumber.js';
+
+
 
 import {
     useToast,
@@ -18,9 +22,14 @@ import {
     Flex,
     Input
 } from '@chakra-ui/react'
+import { useQr } from '@/context/QrContextProvider';
 
 
 export const Connected: FC = () => {
+    const ref = useRef(null);
+    //const { qR, setQr, amount, tableId }: any = useQr();
+
+
 
     const [tx, setTx] = useState("");
     const [transactionState, setTransactionState] = useState(false);
@@ -29,7 +38,7 @@ export const Connected: FC = () => {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
 
-    const companyPrivateKey = nextConfig.env.COM_PRIVATE_KEY;
+    const companyPrivateKey = nextConfig.env.COM1_PRIVATE_KEY
 
 
     const toast = useToast();
@@ -67,6 +76,7 @@ export const Connected: FC = () => {
 
             transaction.add(instruction);
 
+
             const sign = await sendTransaction(transaction, connection);
             setTransactionState(true);
 
@@ -95,10 +105,107 @@ export const Connected: FC = () => {
         }
     };
 
-    const showQR = () => {
-        console.log('Show QR')
-    }
+  
 
+    
+
+    
+    const listTables =  tables.map((item, index) => {
+        const [amount, setAmount] = useState('');
+        const [show, setShow] = useState(false);
+
+        const showQR = (amount: any, item: any) => {
+
+            if (amount <= 0 ) {
+                resultToast('error', 'amount is required')
+            }else {
+                console.log('Show QR')
+    
+                const payKeypair = Keypair.fromSecretKey(base58.decode(companyPrivateKey));
+        
+                const url = encodeURL({
+                    recipient: payKeypair!.publicKey,
+                    amount: new BigNumber(amount),
+                    reference: undefined,
+                    label: `RPS: Table - ${item.id}`,
+                    message: 'Thanks for your order',
+                });
+                console.log(url);
+                const qrCode = createQR(url, 128, 'transparent', 'blue');
+                console.log(qrCode);
+                console.log(ref.current);
+               if (ref.current) {
+                    qrCode.append(ref.current)
+                } else return;
+            }
+           
+        }
+
+
+
+        return (
+            <Box key={index}
+                role={'group'}
+                w={'300px'}
+                h={'400px'}
+                bg={useColorModeValue('white', 'gray.800')}
+                boxShadow={'2xl'}
+                rounded={'lg'}
+                py={5}
+                px={3}
+
+            >
+
+
+                <Stack pt={10} align={'center'} justify={'center'} direction={'column'} >
+
+
+
+                    <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+                        {item.name} - {item.id}
+                    </Heading>
+                    <Stack direction={'row'} align={'center'}>
+                        <Text fontWeight={600} fontSize={'md'}>
+                            Amount
+                        </Text>
+                        <Input
+
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)} />
+                                                    
+
+                    </Stack>
+                    {!show && <Button
+                        color={'teal'}
+                        variant={'solid'}
+                        onClick={() => {
+                            
+                            showQR(amount, item)
+                            setAmount('')
+                        }}
+                    >
+                        Create QR
+                    </Button>
+                    }
+
+                    <Button
+                        color={'teal'}
+                        variant={'ghost'}
+                        onClick={() => {
+                            //clickPay(companyPrivateKey, Number(amount));
+                            setAmount('');
+                        }}
+                    >
+                        Send Amount To QR
+                    </Button>
+                    <Box bg={'gray.400'} h={'128px'} w={'128px'}ref={ref}/>
+                    
+
+
+                </Stack>
+            </Box>
+        )
+    })
 
 
 
@@ -110,72 +217,7 @@ export const Connected: FC = () => {
             <Grid templateColumns='repeat(3, 1fr)' gap={5} mt={10}>
 
                 {
-                    tables.map((item, index) => {
-                        const [amount, setAmount] = useState('');
-                        const [qrCode, setQrCode] = useState(false)
-
-                        return (
-                            <Box key={index}
-                                role={'group'}
-                                w={'100%'}
-                                h={'50vh'}
-                                bg={useColorModeValue('white', 'gray.800')}
-                                boxShadow={'2xl'}
-                                rounded={'lg'}
-                                pos={'relative'}
-                                zIndex={1}
-                                py={5}
-                                px={3}
-
-                            >
-
-                                <Stack pt={10} align={'center'} justify={'center'} direction={'column'} justifyContent={'space-between'}>
-                                    <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
-                                        {item.name} - {item.id}
-                                    </Heading>
-                                    <Stack direction={'row'} align={'center'}>
-                                        <Text fontWeight={600} fontSize={'md'}>
-                                            Amount
-                                        </Text>
-                                        <Input
-
-                                            value={amount}
-                                            onChange={(e) => setAmount(e.target.value)} />
-                                    </Stack>
-                                    {qrCode
-                                        ? 'QR CODE Image'
-                                        : <Button
-                                            color={'teal'}
-                                            variant={'solid'}
-                                            onClick={() => { 
-                                                showQR()
-                                                setQrCode(true) }}
-                                        >
-                                            Create QR
-                                        </Button>
-                                    }
-
-                                    <Button
-                                        color={'teal'}
-                                        variant={'ghost'}
-                                        onClick={() => {
-                                            clickPay(companyPrivateKey, Number(amount));
-                                            setAmount('');
-                                        }}
-                                    >
-                                        Send Amount To QR
-                                    </Button>
-                                    
-                                    <Heading fontSize={'4xl'} fontFamily={'body'} fontWeight={500}>
-                                        {qrCode && 'QR'}
-                                    </Heading>                                    
-
-
-                                    
-                                </Stack>
-                            </Box>
-                        )
-                    })
+                    listTables
                 }
             </Grid>
         </Flex>
