@@ -131,7 +131,7 @@ export const Connected: FC = () => {
                     message: 'Thanks for your order',
                 });
                 console.log(url);
-                const qrCode = createQR(url, 128, 'transparent', 'blue');
+                const qrCode = createQR(url, 128, 'transparent', '#8f6ddf');
                 console.log(qrCode);
                 console.log(ref.current);
                if (ref.current) {
@@ -184,7 +184,7 @@ export const Connected: FC = () => {
                             setAmount('')
                         }}
                     >
-                        Create QR
+                        Generate QR
                     </Button>
                     }
 
