@@ -27,14 +27,13 @@ export const Connected: FC = () => {
             isClosable: true,
         })
     }
-
+    const [amount, setAmount] = useState('');
 
 
     const bgColor = useColorModeValue('white', 'gray.800');
-    
+
     const listTables = tables.map((item, index) => {
-        const [amount, setAmount] = useState('');
-        const [show, setShow] = useState(false);
+        
             
         return (
             <Box key={index}
